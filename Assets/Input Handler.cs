@@ -8,17 +8,16 @@ namespace Game.Input
     [BurstCompile] public class InputHandler : MonoBehaviour
     {
         public static event Action<InputActionMap> OnMapChanged;
-        private static PlayerControl _input;
-
+        public static PlayerControl Inputs;
         private void Awake()
         {
             SceneManager.sceneUnloaded += OnSceneUnloaded;
-            _input = new PlayerControl();
-            ToggleActionMap(_input.Player);
+            Inputs = new PlayerControl();
+            ToggleActionMap(Inputs.Player);
         }
         private void OnSceneUnloaded(Scene current)
         {  
-            _input.Disable();
+            Inputs.Disable();
         }
 
         public static void ToggleActionMap(InputActionMap map)
@@ -26,7 +25,7 @@ namespace Game.Input
             if (map.enabled)
                 return;
             
-            _input.Disable();
+            Inputs.Disable();
             map.Enable();
             OnMapChanged?.Invoke(map);
         }
