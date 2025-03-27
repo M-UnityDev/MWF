@@ -12,7 +12,7 @@ public class Movement : MonoBehaviour
     [SerializeField] private int SprintSpeed;
     [SerializeField] private int JumpHeight;
     [SerializeField] private float RotationSpeed;
-    [SerializeField] private int DistanceToWalk;
+    [SerializeField] private int DistanceToWalkSqrt;
     public int DistanceToWalkF {get => DistanceToWalk; set => DistanceToWalk = value;}
     [SerializeField] private int DistanceToCheck;
     [SerializeField] private bool IsFPC;
@@ -67,7 +67,7 @@ public class Movement : MonoBehaviour
     }
     private void UpdateSpeedChanges()
     {
-        IsClose = Vector3.Distance(transform.position, AnotherPlayer.position) <= DistanceToWalk || IsFPC;
+        IsClose = Vector3.SqrtDistance(transform.position, AnotherPlayer.position) <= DistanceToWalkSqrt || IsFPC;
         if (Sprint.IsPressed() && IsClose)
         {
             CurrentSpeed = SprintSpeed;
