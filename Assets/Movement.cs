@@ -1,8 +1,7 @@
+using Game.Input;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using Game.Input;
-using System;
 public class Movement : MonoBehaviour
 {
     [Header("Input")]
@@ -10,13 +9,16 @@ public class Movement : MonoBehaviour
     [Header("Parameters")]
     [SerializeField] private int BaseSpeed;
     [SerializeField] private int SprintSpeed;
+    [SerializeField] private int SlowSpeed;
     [SerializeField] private int JumpHeight;
     [SerializeField] private float RotationSpeed;
-    [SerializeField] private int DistanceToWalkSqrt;
-    public int DistanceToWalkF {get => DistanceToWalk; set => DistanceToWalk = value;}
+    [SerializeField] private int DistanceToWalkSqr;
+    [SerializeField] private AudioClip JumpSound;
+    public int DistanceToWalkFuckYou { get => DistanceToWalkSqr; set => DistanceToWalkSqr = value; }
     [SerializeField] private int DistanceToCheck;
     [SerializeField] private bool IsFPC;
     [Header("GameObjects")]
+    [SerializeField] private AudioSource Footstep;
     [SerializeField] private Transform AnotherPlayer;
     [SerializeField] private CinemachineCamera Camera;
     [SerializeField] private CinemachineBasicMultiChannelPerlin CameraShake;
@@ -27,6 +29,7 @@ public class Movement : MonoBehaviour
     private int CurrentSpeed;
     private Vector3 Velocity;
     private Vector3 MoveVector;
+    private Vector3 TempMoveVector;
     private bool TempMove;
     private InputAction Move;
     private InputAction Interact;
@@ -34,76 +37,53 @@ public class Movement : MonoBehaviour
     private InputAction Jump;
     private bool IsClose;
     private Collider[] Colliders;
+    private Vector2 InputMove;
     private void Start()
     {
         Move = IsSecondPlayer ? InputHandler.Inputs.Player.MovePlayer2 : InputHandler.Inputs.Player.MovePlayer1;
-        Jump = IsSecondPlayer ? InputHandler.Inputs.Player.JumpPlayer2 : InputHandler.Inputs.Player.JumpPlayer1; 
+        Jump = IsSecondPlayer ? InputHandler.Inputs.Player.JumpPlayer2 : InputHandler.Inputs.Player.JumpPlayer1;
         Interact = IsSecondPlayer ? InputHandler.Inputs.Player.InteractPlayer2 : InputHandler.Inputs.Player.InteractPlayer1;
         Sprint = IsSecondPlayer ? InputHandler.Inputs.Player.SprintPlayer2 : InputHandler.Inputs.Player.SprintPlayer1;
         CharacterControl = GetComponent<CharacterController>();
     }
     private void Update()
     {
+        ReadInput();
         UpdateJump();
         UpdateSpeedChanges();
         UpdatePhysics();
         UpdateCollisons();
-        if (IsFPC)
-            FPCCameraAnimation();
-        else
-            transform.localRotation = Quaternion.Lerp(transform.rotation, new Vector3(Move.ReadValue<Vector2>().x, 0, Move.ReadValue<Vector2>().y).sqrMagnitude > 0 ? Quaternion.LookRotation(new Vector3(Move.ReadValue<Vector2>().x, 0, Move.ReadValue<Vector2>().y)) : transform.rotation, RotationSpeed * Time.deltaTime);
-        //UpdateSound();
+        UpdateSound();
+        UpdateRotation();
     }
-    private void FPCCameraAnimation()
+    private void ReadInput()
     {
-        transform.eulerAngles = new Vector3(transform.eulerAngles.x, CameraTransform.eulerAngles.y, transform.eulerAngles.z);
-        TempMove = !Move.ReadValue<Vector2>().Equals(Vector2.zero);
-        if (Sprint.IsPressed() && TempMove)
-            CameraShake.AmplitudeGain = 1;
-        else if (TempMove)
-            CameraShake.AmplitudeGain = 0.25f;
-        else if (!TempMove)
-            CameraShake.AmplitudeGain = 0;
-    }
-    private void UpdateSpeedChanges()
-    {
-        IsClose = Vector3.SqrtDistance(transform.position, AnotherPlayer.position) <= DistanceToWalkSqrt || IsFPC;
-        if (Sprint.IsPressed() && IsClose)
-        {
-            CurrentSpeed = SprintSpeed;
-            //Footstep.pitch = 2;
-        }
-        else if (IsClose)
-        {
-            CurrentSpeed = BaseSpeed;
-            //Footstep.pitch = 1;
-        }
-        else
-        {
-            CurrentSpeed = 1;
-            //Footstep.pitch = 1;
-        }
+        InputMove = Move.ReadValue<Vector2>();
+        TempMoveVector = new Vector3(InputMove.x, 0, InputMove.y);
     }
     private void UpdateJump()
     {
         if (Jump.IsPressed() && CharacterControl.isGrounded)
         {
             Velocity.y = Mathf.Sqrt(JumpHeight * -2 * Physics.gravity.y);
-            //GetComponent<AudioSource>().PlayOneShot(JumpSound);
+            GetComponent<AudioSource>().PlayOneShot(JumpSound);
         }
         if (CharacterControl.isGrounded && Velocity.y < 0)
             Velocity.y = -2;
     }
-    //private void UpdateSound()
-    //{
-        //if (CharacterControl.isGrounded && Move.ReadValue<Vector2>() != Vector2.zero)
-            //Footstep.mute = false;
-        //else
-            //Footstep.mute = true;
-    //}
+    private void UpdateSpeedChanges()
+    {
+        IsClose = Vector3.SqrMagnitude(AnotherPlayer.position - transform.position) <= DistanceToWalkSqr || IsFPC;
+        if (Sprint.IsPressed() && IsClose)
+            CurrentSpeed = SprintSpeed;
+        else if (IsClose)
+            CurrentSpeed = BaseSpeed;
+        else
+            CurrentSpeed = SlowSpeed;
+    }
     private void UpdatePhysics()
     {
-        MoveVector = IsFPC ? transform.right * Move.ReadValue<Vector2>().x + transform.forward * Move.ReadValue<Vector2>().y : new Vector3(Move.ReadValue<Vector2>().x, 0, Move.ReadValue<Vector2>().y);
+        MoveVector = IsFPC ? transform.right * TempMoveVector.x + transform.forward * TempMoveVector.z : TempMoveVector;
         CharacterControl.Move(CurrentSpeed * Time.deltaTime * MoveVector);
         Velocity.y += Physics.gravity.y * Time.deltaTime;
         CharacterControl.Move(Velocity * Time.deltaTime);
@@ -119,16 +99,47 @@ public class Movement : MonoBehaviour
                 FPC.SetActive(true);
                 IsFPC = true;
                 GetComponent<MeshRenderer>().enabled = false;
-                AnotherPlayer.GetComponent<Movement>().DistanceToWalkF = int.MaxValue;
+                AnotherPlayer.GetComponent<Movement>().DistanceToWalkFuckYou = int.MaxValue;
                 Cursor.lockState = CursorLockMode.Locked;
                 return;
             }
-            else if (Item.GetComponent<Transform>().Equals(AnotherPlayer) && IsFPC)
+            else if (Item.GetComponent<Transform>().Equals(AnotherPlayer) && IsFPC && Interact.WasPressedThisFrame())
             {
                 Destroy(Item.gameObject);
                 AnotherPlayer = FPC.transform;
                 return;
             }
         }
+    }
+    private void UpdateSound()
+    {
+        if (IsFPC)
+        {
+            Footstep.mute = !CharacterControl.isGrounded || InputMove.Equals(Vector2.zero);
+            Footstep.pitch = Jump.IsPressed() ? 2 : 1;
+        }
+    }
+    private void UpdateRotation()
+    {
+        switch (IsFPC)
+        {
+            case true:
+                FPCCameraAnimation();
+                break;
+            default:
+                transform.localRotation = Quaternion.Lerp(transform.rotation, TempMoveVector.sqrMagnitude > 0 ? Quaternion.LookRotation(TempMoveVector) : transform.rotation, RotationSpeed * Time.deltaTime);
+                break;
+        }
+    }
+    private void FPCCameraAnimation()
+    {
+        transform.eulerAngles = new Vector3(transform.eulerAngles.x, CameraTransform.eulerAngles.y, transform.eulerAngles.z);
+        TempMove = !InputMove.Equals(Vector2.zero);
+        if (Sprint.IsPressed() && TempMove)
+            CameraShake.AmplitudeGain = 1;
+        else if (TempMove)
+            CameraShake.AmplitudeGain = 0.25f;
+        else
+            CameraShake.AmplitudeGain = 0;
     }
 }

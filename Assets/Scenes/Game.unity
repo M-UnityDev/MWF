@@ -1954,6 +1954,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2201956808836663369, guid: fe5e69a9a6cbd1159b1942e4fd8c06a1, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2671924950383403397, guid: fe5e69a9a6cbd1159b1942e4fd8c06a1, type: 3}
       propertyPath: field of view
       value: 60
@@ -2018,6 +2022,38 @@ PrefabInstance:
       propertyPath: m_LocalPosition.z
       value: 0.06399998
       objectReference: {fileID: 0}
+    - target: {fileID: 2796654931112062972, guid: fe5e69a9a6cbd1159b1942e4fd8c06a1, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2796654931112062972, guid: fe5e69a9a6cbd1159b1942e4fd8c06a1, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2796654931112062972, guid: fe5e69a9a6cbd1159b1942e4fd8c06a1, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2796654931112062972, guid: fe5e69a9a6cbd1159b1942e4fd8c06a1, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.000000037748947
+      objectReference: {fileID: 0}
+    - target: {fileID: 3530261376051397883, guid: fe5e69a9a6cbd1159b1942e4fd8c06a1, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3530261376051397883, guid: fe5e69a9a6cbd1159b1942e4fd8c06a1, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3530261376051397883, guid: fe5e69a9a6cbd1159b1942e4fd8c06a1, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3530261376051397883, guid: fe5e69a9a6cbd1159b1942e4fd8c06a1, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3914879643839288534, guid: fe5e69a9a6cbd1159b1942e4fd8c06a1, type: 3}
       propertyPath: m_IsActive
       value: 1
@@ -2058,6 +2094,10 @@ PrefabInstance:
       propertyPath: AnotherPlayer
       value: 
       objectReference: {fileID: 2114730312}
+    - target: {fileID: 6893249013426994733, guid: fe5e69a9a6cbd1159b1942e4fd8c06a1, type: 3}
+      propertyPath: m_audioClip
+      value: 
+      objectReference: {fileID: 8300000, guid: fc9acf117d7fd04418ebb573b3954578, type: 3}
     - target: {fileID: 6950580298233674934, guid: fe5e69a9a6cbd1159b1942e4fd8c06a1, type: 3}
       propertyPath: m_Name
       value: Player1
