@@ -2,10 +2,9 @@ using Game.Input;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
-public class Movement : MonoBehaviour
-{
-    [Header("Input")]
-    [SerializeField] private bool IsSecondPlayer;
+using static UnityEngine.InputSystem.InputAction;
+public class MovementBeta : MonoBehaviour
+{ 
     [Header("Parameters")]
     [SerializeField] private int BaseSpeed;
     [SerializeField] private int SprintSpeed;
@@ -18,52 +17,89 @@ public class Movement : MonoBehaviour
     [SerializeField] private int DistanceToCheck;
     [SerializeField] private bool IsFPC;
     [Header("GameObjects")]
+    [SerializeField] private Material[] SecondPlayerMaterial;
+    [SerializeField] private Material SecondPlayerFPCMaterial;
     [SerializeField] private AudioSource Footstep;
-    [SerializeField] private Transform AnotherPlayer;
+    public Transform AnotherPlayer;
     [SerializeField] private CinemachineCamera Camera;
     [SerializeField] private CinemachineBasicMultiChannelPerlin CameraShake;
     [SerializeField] private GameObject FPC;
+    [SerializeField] private GameObject FPCSkin;
     [SerializeField] private Transform CameraTransform;
+    [SerializeField] private CharacterController CharacterControl;
     [Header("Debug Values")]
-    private CharacterController CharacterControl;
     private int CurrentSpeed;
     private Vector3 Velocity;
     private Vector3 MoveVector;
     private Vector3 TempMoveVector;
     private bool TempMove;
-    private InputAction Move;
-    private InputAction Interact;
-    private InputAction Sprint;
-    private InputAction Jump;
+    private MovementBeta[] TempAnotherPlayers;
     private bool IsClose;
+    private bool IsRunning;
     private Collider[] Colliders;
     private Vector2 InputMove;
+    private void Awake()
+    {
+        AnotherPlayer = transform;
+        MoveVector = Vector3.zero;
+    }
     private void Start()
     {
-        //Move = IsSecondPlayer ? InputHandler.Inputs.Player.MovePlayer2 : InputHandler.Inputs.Player.MovePlayer1;
-        //Jump = IsSecondPlayer ? InputHandler.Inputs.Player.JumpPlayer2 : InputHandler.Inputs.Player.JumpPlayer1;
-        //Interact = IsSecondPlayer ? InputHandler.Inputs.Player.InteractPlayer2 : InputHandler.Inputs.Player.InteractPlayer1;
-        //Sprint = IsSecondPlayer ? InputHandler.Inputs.Player.SprintPlayer2 : InputHandler.Inputs.Player.SprintPlayer1;
-        CharacterControl = GetComponent<CharacterController>();
+        FindAnotherPlayers();
+    }
+    public void OnPlayerJoined(PlayerInput playerInput)
+    {
+        //FindAnotherPlayers();
     }
     private void Update()
     {
-        ReadInput();
-        UpdateJump();
         UpdateSpeedChanges();
         UpdatePhysics();
         UpdateCollisons();
         UpdateSound();
         UpdateRotation();
     }
-    private void ReadInput()
+    private void FindAnotherPlayers()
     {
-        InputMove = Move.ReadValue<Vector2>();
+        TempAnotherPlayers = FindObjectsByType<MovementBeta>(FindObjectsSortMode.None);
+        foreach (MovementBeta Player in TempAnotherPlayers)
+        { 
+            if (Player.gameObject != gameObject)
+            {
+                AnotherPlayer = Player.transform;
+                Player.AnotherPlayer = transform;
+                GetComponent<MeshRenderer>().materials = SecondPlayerMaterial;
+                foreach (Transform parts in FPCSkin.transform)
+                {
+                    foreach (MeshRenderer ms in parts.GetComponentsInChildren<MeshRenderer>(true))
+                    {
+                        ms.material = SecondPlayerFPCMaterial;
+                    }
+                }
+            }
+            else
+            {
+                AnotherPlayer = transform;
+            }
+        }
+    }
+    public void OnJump(CallbackContext context)
+    {
+        if(context.performed)
+            UpdateJump();
+    }
+    public void OnSprint(CallbackContext context)
+    {
+        IsRunning = context.performed;
+    }
+    public void OnMove(CallbackContext context)
+    {
+        InputMove = context.ReadValue<Vector2>();
         TempMoveVector = new Vector3(InputMove.x, 0, InputMove.y);
     }
     private void UpdateJump()
     {
-        if (Jump.IsPressed() && CharacterControl.isGrounded)
+        if (CharacterControl.isGrounded)
         {
             Velocity.y = Mathf.Sqrt(JumpHeight * -2 * Physics.gravity.y);
             GetComponent<AudioSource>().PlayOneShot(JumpSound);
@@ -74,7 +110,7 @@ public class Movement : MonoBehaviour
     private void UpdateSpeedChanges()
     {
         IsClose = Vector3.SqrMagnitude(AnotherPlayer.position - transform.position) <= DistanceToWalkSqr || IsFPC;
-        if (Sprint.IsPressed() && IsClose)
+        if (IsRunning && IsClose)
             CurrentSpeed = SprintSpeed;
         else if (IsClose)
             CurrentSpeed = BaseSpeed;
@@ -103,7 +139,7 @@ public class Movement : MonoBehaviour
                 Cursor.lockState = CursorLockMode.Locked;
                 return;
             }
-            else if (Item.GetComponent<Transform>().Equals(AnotherPlayer) && IsFPC && Interact.WasPressedThisFrame())
+            else if (Item.GetComponent<Transform>().Equals(AnotherPlayer) && IsFPC)
             {
                 Destroy(Item.gameObject);
                 AnotherPlayer = FPC.transform;
@@ -116,7 +152,7 @@ public class Movement : MonoBehaviour
         if (IsFPC)
         {
             Footstep.mute = !CharacterControl.isGrounded || InputMove.Equals(Vector2.zero);
-            Footstep.pitch = Jump.IsPressed() ? 2 : 1;
+            Footstep.pitch = IsRunning ? 2 : 1;
         }
     }
     private void UpdateRotation()
@@ -135,7 +171,7 @@ public class Movement : MonoBehaviour
     {
         transform.eulerAngles = new Vector3(transform.eulerAngles.x, CameraTransform.eulerAngles.y, transform.eulerAngles.z);
         TempMove = !InputMove.Equals(Vector2.zero);
-        if (Sprint.IsPressed() && TempMove)
+        if (IsRunning && TempMove)
             CameraShake.AmplitudeGain = 1;
         else if (TempMove)
             CameraShake.AmplitudeGain = 0.25f;
