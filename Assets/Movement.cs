@@ -1,7 +1,5 @@
-using Game.Input;
 using Unity.Cinemachine;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using static UnityEngine.InputSystem.InputAction;
 public class Movement : MonoBehaviour
 { 
