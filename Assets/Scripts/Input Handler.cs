@@ -15,19 +15,14 @@ namespace Game.Input
             Inputs = new PlayerControl();
             ToggleActionMap(Inputs.Player);
         }
-        private void OnSceneUnloaded(Scene current)
-        {  
-            Inputs.Disable();
-        }
-
-        public static void ToggleActionMap(InputActionMap map)
+        private void OnSceneUnloaded(Scene current) => Inputs.Disable();
+        public static void ToggleActionMap(InputActionMap Map)
         {
-            if (map.enabled)
+            if (Map.enabled)
                 return;
-            
             Inputs.Disable();
-            map.Enable();
-            OnMapChanged?.Invoke(map);
+            Map.Enable();
+            OnMapChanged?.Invoke(Map);
         }
     }
 }

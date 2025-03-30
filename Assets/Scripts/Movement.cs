@@ -41,7 +41,7 @@ public class Movement : MonoBehaviour
         TempAnotherPlayers = FindObjectsByType<Movement>(FindObjectsSortMode.None);
         foreach (Movement Player in TempAnotherPlayers)
         {
-            switch (Player.gameObject != gameObject)
+            switch (!Player.gameObject.Equals(gameObject))
             {
                 case true:
                     AnotherPlayer = Player.transform;
@@ -52,7 +52,8 @@ public class Movement : MonoBehaviour
                             ms.material = SecondPlayerFPCMaterial;
                     break;
                 case false:
-                    AnotherPlayer = transform;
+                    if(AnotherPlayer.Equals(null))
+                        AnotherPlayer = transform;
                     break;
             }
         }
@@ -104,7 +105,6 @@ public class Movement : MonoBehaviour
         MoveVector = IsFPC ? transform.right * TempMoveVector.x + transform.forward * TempMoveVector.z : TempMoveVector;
         Velocity.y += Physics.gravity.y * Time.deltaTime;
         CharacterControl.Move(CurrentSpeed * Time.deltaTime * (MoveVector + Velocity));
-        //CharacterControl.Move(Velocity * Time.deltaTime);
     }
     private void UpdateCollisons()
     {
@@ -118,11 +118,11 @@ public class Movement : MonoBehaviour
                 IsFPC = true;
                 GetComponent<MeshRenderer>().enabled = false;
                 AnotherPlayer.GetComponent<Movement>().DistanceToWalkFuckYou = int.MaxValue;
-                Destroy(Camera.main);
+                Destroy(Camera.main.transform.parent);
                 Cursor.lockState = CursorLockMode.Locked;
                 return;
             }
-            else if (Item.GetComponent<Transform>().Equals(AnotherPlayer) && IsFPC)
+            else if (Item.transform.Equals(AnotherPlayer) && IsFPC)
             {
                 Destroy(Item.gameObject);
                 AnotherPlayer = FPC.transform;

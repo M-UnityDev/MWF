@@ -727,7 +727,7 @@ MonoBehaviour:
   SlowSpeed: 1
   JumpHeight: 2
   RotationSpeed: 15
-  DistanceToWalkSqr: 25
+  DistanceToWalkSqr: 625
   JumpSound: {fileID: 8300000, guid: f0e4fadd98bdec14ca4d782abb15c5c5, type: 3}
   DistanceToCheck: 2
   IsFPC: 0
