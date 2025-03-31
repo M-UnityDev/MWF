@@ -1,5 +1,6 @@
 using Unity.Cinemachine;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using static UnityEngine.InputSystem.InputAction;
 public class Movement : MonoBehaviour
 { 
@@ -11,6 +12,7 @@ public class Movement : MonoBehaviour
     [SerializeField] private float RotationSpeed;
     [SerializeField] private int DistanceToWalkSqr;
     [SerializeField] private AudioClip JumpSound;
+    [SerializeField] private AudioClip DeathSound;
     public int DistanceToWalkFuckYou { get => DistanceToWalkSqr; set => DistanceToWalkSqr = value; }
     [SerializeField] private int DistanceToCheck;
     [SerializeField] private bool IsFPC;
@@ -39,18 +41,22 @@ public class Movement : MonoBehaviour
     {
         FindFirstObjectByType<CinemachineTargetGroup>().AddMember(transform, 10, 5);
         TempAnotherPlayers = FindObjectsByType<Movement>(FindObjectsSortMode.None);
+        
         foreach (Movement Player in TempAnotherPlayers)
         {
             switch (!Player.gameObject.Equals(gameObject))
             {
                 case true:
+                    CharacterControl.enabled = false;
+                    transform.position = new Vector3(2,0.5f);
+                    CharacterControl.enabled = true;
                     AnotherPlayer = Player.transform;
                     Player.AnotherPlayer = transform;
                     GetComponent<MeshRenderer>().materials = SecondPlayerMaterial;
                     foreach (Transform parts in FPCSkin.transform)
                         foreach (MeshRenderer ms in parts.GetComponentsInChildren<MeshRenderer>(true))
                             ms.material = SecondPlayerFPCMaterial;
-                    break;
+                    return;
                 case false:
                     if(AnotherPlayer.Equals(null))
                         AnotherPlayer = transform;
@@ -124,8 +130,15 @@ public class Movement : MonoBehaviour
             }
             else if (Item.transform.Equals(AnotherPlayer) && IsFPC)
             {
-                Destroy(Item.gameObject);
-                AnotherPlayer = FPC.transform;
+                Destroy(Item.GetComponent<Movement>());
+                Item.GetComponent<AudioSource>().PlayOneShot(DeathSound);
+                Item.GetComponentInChildren<SpriteRenderer>().gameObject.SetActive(true);
+                Destroy(Item.GetComponent<CharacterController>());
+                Destroy(Item.GetComponent<MeshRenderer>());
+                Destroy(Item.GetComponent<PlayerInput>());
+                Destroy(Item.GetComponent<BoxCollider>());
+                //Destroy(Item.gameObject);
+                //AnotherPlayer = FPC.transform;
                 return;
             }
         }
