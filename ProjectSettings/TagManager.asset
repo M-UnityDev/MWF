@@ -3,15 +3,19 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 3
-  tags: []
+  tags:
+  - Plane
+  - Rotate0
+  - Rotate180
+  - Rotate90
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Plane
   - Water
   - UI
-  - Pasue PP
+  - 
   - 
   - 
   - 

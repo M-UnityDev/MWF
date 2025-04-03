@@ -1,6 +1,8 @@
+using DG.Tweening;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Rendering.Universal;
 using static UnityEngine.InputSystem.InputAction;
 public class Movement : MonoBehaviour
 { 
@@ -35,6 +37,7 @@ public class Movement : MonoBehaviour
     private Movement[] TempAnotherPlayers;
     private bool IsClose;
     private bool IsRunning;
+    private bool IsWin;
     private Collider[] Colliders;
     private Vector2 InputMove;
     private void Awake()
@@ -124,21 +127,27 @@ public class Movement : MonoBehaviour
                 IsFPC = true;
                 GetComponent<MeshRenderer>().enabled = false;
                 AnotherPlayer.GetComponent<Movement>().DistanceToWalkFuckYou = int.MaxValue;
-                Destroy(Camera.main.transform.parent);
+                
+                Destroy(Camera.main.transform.parent.GetComponent<CinemachineCamera>());
+                Destroy(Camera.main.transform.parent.GetComponent<CinemachineGroupFraming>());
+                Destroy(Camera.main.transform.parent.GetComponent<CinemachineDecollider>());
+                Destroy(Camera.main.transform.parent.GetComponent<CameraTriggerDirector>());
+                Camera.main.gameObject.SetActive(false);
                 Cursor.lockState = CursorLockMode.Locked;
                 return;
             }
-            else if (Item.transform.Equals(AnotherPlayer) && IsFPC)
+            else if (Item.transform.Equals(AnotherPlayer) && IsFPC && !IsWin)
             {
+                IsWin = true;
                 Destroy(Item.GetComponent<Movement>());
                 Item.GetComponent<AudioSource>().PlayOneShot(DeathSound);
-                Item.GetComponentInChildren<SpriteRenderer>().gameObject.SetActive(true);
-                Destroy(Item.GetComponent<CharacterController>());
+                Item.GetComponentInChildren<SpriteRenderer>().enabled = true;
+                Item.GetComponentInChildren<SpriteRenderer>().gameObject.GetComponentInChildren<ParticleSystem>().Play();
+                Item.GetComponentInChildren<SpriteRenderer>().DOFade(1,0.5f);
                 Destroy(Item.GetComponent<MeshRenderer>());
                 Destroy(Item.GetComponent<PlayerInput>());
+                Destroy(Item.GetComponent<CharacterController>());
                 Destroy(Item.GetComponent<BoxCollider>());
-                //Destroy(Item.gameObject);
-                //AnotherPlayer = FPC.transform;
                 return;
             }
         }
