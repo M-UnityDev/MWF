@@ -8,6 +8,7 @@ TagManager:
   - Rotate0
   - Rotate180
   - Rotate90
+  - RotateY90
   layers:
   - Default
   - TransparentFX
@@ -15,8 +16,8 @@ TagManager:
   - Plane
   - Water
   - UI
-  - 
-  - 
+  - CameraTrigger
+  - Outline
   - 
   - 
   - 

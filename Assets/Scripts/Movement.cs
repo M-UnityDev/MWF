@@ -3,6 +3,7 @@ using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.SceneManagement;
 using static UnityEngine.InputSystem.InputAction;
 public class Movement : MonoBehaviour
 { 
@@ -15,6 +16,7 @@ public class Movement : MonoBehaviour
     [SerializeField] private int DistanceToWalkSqr;
     [SerializeField] private AudioClip JumpSound;
     [SerializeField] private AudioClip DeathSound;
+    [SerializeField] private LayerMask LayersToInclude;
     public int DistanceToWalkFuckYou { get => DistanceToWalkSqr; set => DistanceToWalkSqr = value; }
     [SerializeField] private int DistanceToCheck;
     [SerializeField] private bool IsFPC;
@@ -38,56 +40,51 @@ public class Movement : MonoBehaviour
     private bool IsClose;
     private bool IsRunning;
     private bool IsWin;
+    private VibrationDirector Vibrator;
     private Collider[] Colliders;
     private Vector2 InputMove;
     private void Awake()
     {
         FindFirstObjectByType<CinemachineTargetGroup>().AddMember(transform, 10, 5);
         TempAnotherPlayers = FindObjectsByType<Movement>(FindObjectsSortMode.None);
-        
+        Vibrator = FindFirstObjectByType<VibrationDirector>();
         foreach (Movement Player in TempAnotherPlayers)
         {
-            switch (!Player.gameObject.Equals(gameObject))
+            if(!Player.gameObject.Equals(gameObject))
             {
-                case true:
-                    CharacterControl.enabled = false;
-                    transform.position = new Vector3(2,0.5f);
-                    CharacterControl.enabled = true;
-                    AnotherPlayer = Player.transform;
-                    Player.AnotherPlayer = transform;
-                    GetComponent<MeshRenderer>().materials = SecondPlayerMaterial;
-                    foreach (Transform parts in FPCSkin.transform)
-                        foreach (MeshRenderer ms in parts.GetComponentsInChildren<MeshRenderer>(true))
-                            ms.material = SecondPlayerFPCMaterial;
-                    return;
-                case false:
-                    if(AnotherPlayer.Equals(null))
-                        AnotherPlayer = transform;
-                    break;
+                
+                CharacterControl.enabled = false;
+                transform.position = new Vector3(2,0.5f);
+                CharacterControl.enabled = true;
+                AnotherPlayer = Player.transform;
+                Player.AnotherPlayer = transform;
+                GetComponent<MeshRenderer>().materials = SecondPlayerMaterial;
+                foreach (Transform parts in FPCSkin.transform)
+                    foreach (MeshRenderer ms in parts.GetComponentsInChildren<MeshRenderer>(true))
+                        ms.material = SecondPlayerFPCMaterial;
+                return;
             }
+            else if(AnotherPlayer.Equals(null)) AnotherPlayer = transform;
         }
     }
-    private void Update()
-    {
-        UpdateSpeedChanges();
-        UpdatePhysics();
-        UpdateCollisons();
-        UpdateSound();
-        UpdateRotation();
-    }
+    public void OnDisconnect() => SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     public void OnJump(CallbackContext context)
     {
-        if(context.performed)
-            UpdateJump();
+        if(context.performed) UpdateJump();
     }
-    public void OnSprint(CallbackContext context)
-    {
-        IsRunning = context.performed;
-    }
+    public void OnSprint(CallbackContext context) => IsRunning = context.performed;
     public void OnMove(CallbackContext context)
     {
         InputMove = context.ReadValue<Vector2>();
         TempMoveVector = new Vector3(InputMove.x, 0, InputMove.y);
+    }
+    private void FixedUpdate() => UpdatePhysics();
+    private void Update()
+    {
+        UpdateSpeedChanges();
+        UpdateCollisons();
+        UpdateSound();
+        UpdateRotation();
     }
     private void UpdateJump()
     {
@@ -96,8 +93,7 @@ public class Movement : MonoBehaviour
             Velocity.y = Mathf.Sqrt(JumpHeight * -2 * Physics.gravity.y);
             GetComponent<AudioSource>().PlayOneShot(JumpSound);
         }
-        if (CharacterControl.isGrounded && Velocity.y < 0)
-            Velocity.y = -2;
+        if (CharacterControl.isGrounded && Velocity.y < 0) Velocity.y = -2;
     }
     private void UpdateSpeedChanges()
     {
@@ -113,11 +109,11 @@ public class Movement : MonoBehaviour
     {
         MoveVector = IsFPC ? transform.right * TempMoveVector.x + transform.forward * TempMoveVector.z : TempMoveVector;
         Velocity.y += Physics.gravity.y * Time.deltaTime;
-        CharacterControl.Move(CurrentSpeed * Time.deltaTime * (MoveVector + Velocity));
+        CharacterControl.Move(Time.deltaTime * ((CurrentSpeed * MoveVector) + Velocity));
     }
     private void UpdateCollisons()
     {
-        Colliders = Physics.OverlapBox(transform.position + transform.forward * DistanceToCheck, Vector3.one / 2, transform.localRotation);
+        Colliders = Physics.OverlapBox(transform.position + transform.forward * DistanceToCheck, Vector3.one / 2, transform.localRotation, LayersToInclude);
         foreach (Collider Item in Colliders)
         {
             if (Item.CompareTag("Finish"))
@@ -142,7 +138,7 @@ public class Movement : MonoBehaviour
                 Destroy(Item.GetComponent<Movement>());
                 Item.GetComponent<AudioSource>().PlayOneShot(DeathSound);
                 Item.GetComponentInChildren<SpriteRenderer>().enabled = true;
-                Item.GetComponentInChildren<SpriteRenderer>().gameObject.GetComponentInChildren<ParticleSystem>().Play();
+                Item.GetComponentInChildren<SpriteRenderer>().GetComponentInChildren<ParticleSystem>().Play();
                 Item.GetComponentInChildren<SpriteRenderer>().DOFade(1,0.5f);
                 Destroy(Item.GetComponent<MeshRenderer>());
                 Destroy(Item.GetComponent<PlayerInput>());
@@ -154,33 +150,31 @@ public class Movement : MonoBehaviour
     }
     private void UpdateSound()
     {
-        if (IsFPC)
-        {
-            Footstep.mute = !CharacterControl.isGrounded || InputMove.Equals(Vector2.zero);
-            Footstep.pitch = IsRunning ? 2 : 1;
-        }
+        Footstep.mute = !CharacterControl.isGrounded || InputMove.Equals(Vector2.zero) || !IsFPC;
+        Footstep.pitch = IsRunning && IsFPC ? 2 : 1;
     }
     private void UpdateRotation()
     {
-        switch (IsFPC)
+        if(IsFPC)
         {
-            case true:
-                FPCCameraAnimation();
+            transform.eulerAngles = new Vector3(transform.eulerAngles.x, CameraTransform.eulerAngles.y, transform.eulerAngles.z);
+            TempMove = !InputMove.Equals(Vector2.zero);
+            switch (IsRunning, TempMove)
+            {
+                case (true,true):
+                    CameraShake.AmplitudeGain = 1;
+                    Vibrator.StartVibrate(1,1);
                 break;
-            default:
-                transform.localRotation = Quaternion.Lerp(transform.rotation, TempMoveVector.sqrMagnitude > 0 ? Quaternion.LookRotation(TempMoveVector) : transform.rotation, RotationSpeed * Time.deltaTime);
+                case (false,true):
+                    CameraShake.AmplitudeGain = 0.25f;
+                    Vibrator.StartVibrate(0.1f,0.1f);
                 break;
+                default:
+                    CameraShake.AmplitudeGain = 0;
+                    Vibrator.StopVibrate();
+                break;
+            }
         }
-    }
-    private void FPCCameraAnimation()
-    {
-        transform.eulerAngles = new Vector3(transform.eulerAngles.x, CameraTransform.eulerAngles.y, transform.eulerAngles.z);
-        TempMove = !InputMove.Equals(Vector2.zero);
-        if (IsRunning && TempMove)
-            CameraShake.AmplitudeGain = 1;
-        else if (TempMove)
-            CameraShake.AmplitudeGain = 0.25f;
-        else
-            CameraShake.AmplitudeGain = 0;
+        else transform.localRotation = Quaternion.Lerp(transform.rotation, TempMoveVector.sqrMagnitude > 0 ? Quaternion.LookRotation(TempMoveVector) : transform.rotation, RotationSpeed * Time.deltaTime);
     }
 }
