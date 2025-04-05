@@ -54,7 +54,7 @@ public class Movement : MonoBehaviour
             {
                 
                 CharacterControl.enabled = false;
-                transform.position = new Vector3(2,0.5f);
+                transform.position = new Vector3(0,0.5f,2);
                 CharacterControl.enabled = true;
                 AnotherPlayer = Player.transform;
                 Player.AnotherPlayer = transform;
@@ -76,7 +76,7 @@ public class Movement : MonoBehaviour
     public void OnMove(CallbackContext context)
     {
         InputMove = context.ReadValue<Vector2>();
-        TempMoveVector = new Vector3(InputMove.x, 0, InputMove.y);
+        TempMoveVector = PlayerPrefs.GetInt("Invert",0).Equals(0) ? new Vector3(InputMove.x, 0, InputMove.y) : new Vector3(InputMove.y, 0, InputMove.x);
     }
     private void FixedUpdate() => UpdatePhysics();
     private void Update()

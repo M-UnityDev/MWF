@@ -13,7 +13,7 @@ public class PlayersPanel : MonoBehaviour
         Image = GetComponent<Image>();
         CanvasGroup = GetComponent<CanvasGroup>();
         CanvasGroup.alpha = 1;
-        Image.color = new Color(0.5f,0,0,0.9f);
+        Image.color = new Color(0.5f,0,0,1);
     }
     public void OnJoined()
     {

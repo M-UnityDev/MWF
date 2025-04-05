@@ -11,15 +11,19 @@ public class CameraTriggerDirector : MonoBehaviour
             {
                 case (true,false,false,false):
                     transform.DORotate(Vector3.right*90,1);
+                    PlayerPrefs.SetInt("Invert",0);
                     return;
                 case (false,true,false,false):
                     transform.DORotate(Vector3.zero,1);
+                    PlayerPrefs.SetInt("Invert",0);
                     return;
                 case (false,false,true,false):
                     transform.DORotate(Vector3.right*180,1);
+                    PlayerPrefs.SetInt("Invert",0);
                     return;
                 case (false,false,false,true):
                     transform.DORotate(Vector3.up*90,1);
+                    PlayerPrefs.SetInt("Invert",1);
                     return;
             }
         }
