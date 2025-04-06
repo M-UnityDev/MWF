@@ -2,7 +2,6 @@ using DG.Tweening;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
 using static UnityEngine.InputSystem.InputAction;
 public class Movement : MonoBehaviour
@@ -17,6 +16,7 @@ public class Movement : MonoBehaviour
     [SerializeField] private AudioClip JumpSound;
     [SerializeField] private AudioClip DeathSound;
     [SerializeField] private LayerMask LayersToInclude;
+    [SerializeField] private LayerMask Walls;
     public int DistanceToWalkFuckYou { get => DistanceToWalkSqr; set => DistanceToWalkSqr = value; }
     [SerializeField] private int DistanceToCheck;
     [SerializeField] private bool IsFPC;
@@ -41,6 +41,7 @@ public class Movement : MonoBehaviour
     private bool IsRunning;
     private bool IsWin;
     private VibrationDirector Vibrator;
+    private GameObject outline;
     private Collider[] Colliders;
     private Vector2 InputMove;
     private void Awake()
@@ -52,11 +53,12 @@ public class Movement : MonoBehaviour
         {
             if(!Player.gameObject.Equals(gameObject))
             {
-                
                 CharacterControl.enabled = false;
                 transform.position = new Vector3(0,0.5f,2);
                 CharacterControl.enabled = true;
                 AnotherPlayer = Player.transform;
+                outline = AnotherPlayer.Find("Outline").gameObject;
+                AnotherPlayer.GetComponent<Movement>().outline = transform.Find("Outline").gameObject;
                 Player.AnotherPlayer = transform;
                 GetComponent<MeshRenderer>().materials = SecondPlayerMaterial;
                 foreach (Transform parts in FPCSkin.transform)
@@ -85,6 +87,7 @@ public class Movement : MonoBehaviour
         UpdateCollisons();
         UpdateSound();
         UpdateRotation();
+        UpdateOutline();
     }
     private void UpdateJump()
     {
@@ -176,5 +179,10 @@ public class Movement : MonoBehaviour
             }
         }
         else transform.localRotation = Quaternion.Lerp(transform.rotation, TempMoveVector.sqrMagnitude > 0 ? Quaternion.LookRotation(TempMoveVector) : transform.rotation, RotationSpeed * Time.deltaTime);
+    }
+    public void UpdateOutline()
+    {
+        if (IsFPC)
+            outline.SetActive(Physics.RaycastAll(transform.position, AnotherPlayer.position - transform.position, Mathf.Sqrt(Vector3.SqrMagnitude(AnotherPlayer.position - transform.position)), Walls).Length > 0);
     }
 }
