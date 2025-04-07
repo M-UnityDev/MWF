@@ -15,4 +15,22 @@ public class ItemDirector : MonoBehaviour
         MoveItem.SetActive(ItemType.Equals(ItemEnum.Move));
         DestroyItem.SetActive(ItemType.Equals(ItemEnum.Destroy));
     }
+    private void OnTriggerEnter(Collider other)
+    {
+        switch (ItemType)
+        {
+            case ItemEnum.Move:
+            if(MoveItem.TryGetComponent(out IItem mvitem)) 
+                mvitem.StartAction(other.gameObject);
+            break;
+            case ItemEnum.Speed:
+            if(SpeedItem.TryGetComponent(out IItem sitem)) 
+                sitem.StartAction(other.gameObject);
+            break;
+            case ItemEnum.Destroy:
+            if(DestroyItem.TryGetComponent(out IItem ditem)) 
+                ditem.StartAction(other.gameObject);
+            break;
+        }
+    }
 }

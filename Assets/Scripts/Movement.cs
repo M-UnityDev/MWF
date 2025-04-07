@@ -15,6 +15,7 @@ public class Movement : MonoBehaviour
     [SerializeField] private float RotationSpeed;
     [SerializeField] private int DistanceToWalkSqr;
     [SerializeField] private AudioClip JumpSound;
+    [SerializeField] private AudioClip SecondPhaseMusic;
     [SerializeField] private AudioClip DeathSound;
     [SerializeField] private LayerMask LayersToInclude;
     [SerializeField] private LayerMask Walls;
@@ -28,6 +29,7 @@ public class Movement : MonoBehaviour
     [SerializeField] private AudioSource Footstep;
     public Transform AnotherPlayer;
     [SerializeField] private CinemachineBasicMultiChannelPerlin CameraShake;
+    [SerializeField] private CinemachineCamera AbsoluteCinema;
     [SerializeField] private GameObject FPC;
     [SerializeField] private GameObject FPCSkin;
     [SerializeField] private Transform CameraTransform;
@@ -43,6 +45,7 @@ public class Movement : MonoBehaviour
     [SerializeField] private GameObject LeftLeg;
     [Header("Debug Values")]
     private int CurrentSpeed;
+    private float HorizontalAxis;
     private Vector3 Velocity;
     private Vector3 MoveVector = Vector3.zero;
     private Vector3 TempMoveVector;
@@ -95,6 +98,7 @@ public class Movement : MonoBehaviour
     private void FixedUpdate() => UpdatePhysics();
     private void Update()
     {
+        HorizontalAxis = Mathf.Lerp(HorizontalAxis, InputMove.x,5*Time.deltaTime);
         UpdateSpeedChanges();
         UpdateCollisons();
         UpdateSound();
@@ -163,6 +167,7 @@ public class Movement : MonoBehaviour
         if(IsFPC)
         {
             transform.eulerAngles = new Vector3(transform.eulerAngles.x, CameraTransform.eulerAngles.y, transform.eulerAngles.z);
+            AbsoluteCinema.Lens.Dutch = -HorizontalAxis*5;
             TempMove = !InputMove.Equals(Vector2.zero);
             switch (IsRunning, TempMove)
             {
@@ -189,7 +194,8 @@ public class Movement : MonoBehaviour
     }
     private IEnumerator WinCutScene(GameObject Item)
     {
-        Destroy(Item.gameObject);
+        Item.SetActive(false);
+        GetComponent<AudioSource>().PlayOneShot(SecondPhaseMusic);
         transform.DORotate(Vector3.up*180,1);
         Camera.main.transform.parent.GetComponent<CinemachineTargetGroup>().RemoveMember(AnotherPlayer);
         UpdateJump();
@@ -200,15 +206,15 @@ public class Movement : MonoBehaviour
         LeftLeg.SetActive(true);
         RightLeg.SetActive(true);
         Model.transform.DOLocalMoveY(-1.28f,1).SetEase(Ease.InOutCubic);
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds(0.9f);
         Body.SetActive(true);
         ArmLeft.SetActive(true);
         ArmRight.SetActive(true);
         Model.transform.DOLocalMoveY(-2,1);
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds(0.9f);
         ArmLeft.transform.DOLocalMoveX(-0.3125f,1).SetEase(Ease.InOutCubic);
         ArmRight.transform.DOLocalMoveX(0.3125f,1).SetEase(Ease.InOutCubic);
-        yield return new WaitForSeconds(1);
+        //yield return new WaitForSeconds(1);
         Head.SetActive(true);
         Head.transform.localScale = Vector3.one*2;
         GetComponent<MeshRenderer>().enabled = false;
