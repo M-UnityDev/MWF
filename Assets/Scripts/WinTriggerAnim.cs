@@ -8,9 +8,9 @@ public class WinTriggerAnim : MonoBehaviour
     {
         while (transform != null)
         {
-            transform.DOMoveY(1,0.5f);
+            transform.DOMoveY(1,0.5f).SetEase(Ease.InOutCubic);
             yield return new WaitForSeconds(0.5f);
-            transform.DOMoveY(2,0.5f);
+            transform.DOMoveY(2,0.5f).SetEase(Ease.InOutCubic);
             yield return new WaitForSeconds(0.5f);
         }
     }

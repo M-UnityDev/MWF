@@ -1,6 +1,7 @@
 using System.Collections;
 using DG.Tweening;
 using Unity.Cinemachine;
+using Unity.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -55,7 +56,8 @@ public class Movement : MonoBehaviour
     private bool IsRunning;
     private bool IsWin;
     private VibrationDirector Vibrator;
-    private GameObject outline;
+    private GameObject Outline;
+    private AudioSource FirstPhaseAudio;
     private Collider[] Colliders;
     private Vector2 InputMove;
     private void Awake()
@@ -63,6 +65,7 @@ public class Movement : MonoBehaviour
         SkyMaterial.color = Color.green;
         FindFirstObjectByType<CinemachineTargetGroup>().AddMember(transform, 10, 5);
         TempAnotherPlayers = FindObjectsByType<Movement>(FindObjectsSortMode.None);
+        FirstPhaseAudio = GameObject.Find("Systems").GetComponent<AudioSource>();
         Vibrator = FindFirstObjectByType<VibrationDirector>();
         foreach (Movement Player in TempAnotherPlayers)
         {
@@ -72,8 +75,8 @@ public class Movement : MonoBehaviour
                 transform.position = new Vector3(0,0.5f,2);
                 CharacterControl.enabled = true;
                 AnotherPlayer = Player.transform;
-                outline = AnotherPlayer.Find("Outline").gameObject;
-                AnotherPlayer.GetComponent<Movement>().outline = transform.Find("Outline").gameObject;
+                Outline = AnotherPlayer.Find("Outline").gameObject;
+                AnotherPlayer.GetComponent<Movement>().Outline = transform.Find("Outline").gameObject;
                 Player.AnotherPlayer = transform;
                 GetComponent<MeshRenderer>().materials = SecondPlayerMaterial;
                 foreach (Transform parts in FPCSkin.transform)
@@ -98,8 +101,7 @@ public class Movement : MonoBehaviour
     private void FixedUpdate() => UpdatePhysics();
     private void Update()
     {
-        //HorizontalAxis = Mathf.Lerp(HorizontalAxis, InputMove.x,5*Time.deltaTime);
-        HorizontalAxis = InputMove.x;
+        HorizontalAxis = Mathf.Lerp(HorizontalAxis, InputMove.x,5*Time.deltaTime);
         UpdateSpeedChanges();
         UpdateCollisons();
         UpdateSound();
@@ -138,7 +140,8 @@ public class Movement : MonoBehaviour
         {
             if (Item.CompareTag("Finish"))
             {
-                StartCoroutine(WinCutScene(Item.gameObject));
+                Item.gameObject.SetActive(false);
+                StartCoroutine(WinCutScene());
                 return;
             }
             else if (Item.transform.Equals(AnotherPlayer) && IsFPC && !IsWin)
@@ -191,17 +194,22 @@ public class Movement : MonoBehaviour
     private void UpdateOutline()
     {
         if (IsFPC)
-            outline.SetActive(Physics.RaycastAll(transform.position, AnotherPlayer.position - transform.position, Mathf.Sqrt(Vector3.SqrMagnitude(AnotherPlayer.position - transform.position)), Walls).Length > 0);
+            Outline.SetActive(Physics.RaycastAll(transform.position, AnotherPlayer.position - transform.position, Mathf.Sqrt(Vector3.SqrMagnitude(AnotherPlayer.position - transform.position)), Walls).Length > 0);
     }
-    private IEnumerator WinCutScene(GameObject Item)
+    private IEnumerator WinCutScene()
     {
-        Item.SetActive(false);
         GetComponent<AudioSource>().PlayOneShot(SecondPhaseMusic);
-        transform.DORotate(Vector3.up*180,1);
-        Camera.main.transform.parent.GetComponent<CinemachineTargetGroup>().RemoveMember(AnotherPlayer);
+        DOTween.To(()=>FirstPhaseAudio.volume,x=>FirstPhaseAudio.volume=x,0,1);
+        transform.DORotate(Vector3.up*90,1);
+        GameObject Tempcam = Camera.main.transform.parent.gameObject;
+        Destroy(AnotherPlayer.Find("BackCamera").gameObject);
+        Camera.main.transform.parent = null;
+        GameObject.Find("OutlineCamera").transform.parent = null;
         UpdateJump();
         yield return new WaitForSeconds(0.45f);
         CharacterControl.enabled = false;
+        Tempcam.SetActive(false);
+        yield return new WaitForSeconds(1);
         FPC.SetActive(true);
         Model.SetActive(true);
         LeftLeg.SetActive(true);
@@ -213,35 +221,29 @@ public class Movement : MonoBehaviour
         ArmRight.SetActive(true);
         Model.transform.DOLocalMoveY(-2,1);
         yield return new WaitForSeconds(0.9f);
-        ArmLeft.transform.DOLocalMoveX(-0.3125f,1).SetEase(Ease.InOutCubic);
-        ArmRight.transform.DOLocalMoveX(0.3125f,1).SetEase(Ease.InOutCubic);
-        //yield return new WaitForSeconds(1);
+        ArmLeft.transform.DOLocalMoveX(-0.3125f,0.1f).SetEase(Ease.InOutCubic);
+        ArmRight.transform.DOLocalMoveX(0.3125f,0.1f).SetEase(Ease.InOutCubic);
+        yield return new WaitForSeconds(0.1f);
         Head.SetActive(true);
         Head.transform.localScale = Vector3.one*2;
         GetComponent<MeshRenderer>().enabled = false;
         Head.transform.DOScale(Vector3.one,1);
         yield return new WaitForSeconds(1);
         Model.transform.DOLocalMoveY(-0.5f,1);
-        transform.DORotate(Vector3.zero,1);
+        //transform.DORotate(Vector3.zero,1);
         yield return new WaitForSeconds(0.5f);
         if (Velocity.y < 0) Velocity.y = -2;
         CharacterControl.enabled = true;
+        CameraTransform.eulerAngles = transform.forward;
         CameraTransform.gameObject.SetActive(true);
-        yield return new WaitForSeconds(2);
-        Destroy(Camera.main.transform.parent.GetComponent<CinemachineCamera>());
-        Destroy(Camera.main.transform.parent.GetComponent<CinemachineGroupFraming>());
-        Destroy(Camera.main.transform.parent.GetComponent<CinemachineTargetGroup>());
-        Destroy(Camera.main.transform.parent.GetComponent<CinemachineDeoccluder>());
-        Destroy(Camera.main.transform.parent.GetComponent<CameraTriggerDirector>());
-        IsFPC = true;
+        yield return new WaitForSeconds(1);
+        Destroy(Tempcam);
+        IsFPC=true;
         AnotherPlayer.GetComponent<Movement>().DistanceToWalkFuckYou = int.MaxValue;
         SkyMaterial.DOColor(Color.red,1);
         TempMaterial.color = new Color(0.5f,1,0.5f);
         TempMaterial.DOColor(new Color(1,0.5f,0.5f),1).OnUpdate(() => {RenderSettings.ambientLight = TempMaterial.color;});
-        Camera.main.transform.parent = null;
-        GameObject.Find("OutlineCamera").transform.parent = null;
-        //FPCamera.SetActive(true);
-        //FPCameraOutline.SetActive(true);
+        //Camera.main.transform.parent = null;
         Cursor.lockState = CursorLockMode.Locked;
 
     }
