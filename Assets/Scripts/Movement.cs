@@ -98,7 +98,8 @@ public class Movement : MonoBehaviour
     private void FixedUpdate() => UpdatePhysics();
     private void Update()
     {
-        HorizontalAxis = Mathf.Lerp(HorizontalAxis, InputMove.x,5*Time.deltaTime);
+        //HorizontalAxis = Mathf.Lerp(HorizontalAxis, InputMove.x,5*Time.deltaTime);
+        HorizontalAxis = InputMove.x;
         UpdateSpeedChanges();
         UpdateCollisons();
         UpdateSound();
