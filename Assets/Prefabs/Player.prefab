@@ -5454,7 +5454,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 1
-  m_Volume: 0.75
+  m_Volume: 1
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -5573,6 +5573,7 @@ MonoBehaviour:
   SecondPlayerFPCMaterial: {fileID: 2100000, guid: 0b89563250a92ad459f7e68739e130ea, type: 2}
   SkyMaterial: {fileID: 2100000, guid: 10c28d6373e5c8521aca1fb70d5b28f3, type: 2}
   Footstep: {fileID: 6893249013426994733}
+  BackCamera: {fileID: 4802813334950974879}
   AnotherPlayer: {fileID: 0}
   CameraShake: {fileID: 1226501090064218171}
   AbsoluteCinema: {fileID: 1070585767909667622}

@@ -1,9 +1,12 @@
 using UnityEngine;
 using Game.Input;
 using DG.Tweening;
+using System.Collections;
+using UnityEngine.SceneManagement;
 public class PauseDirector : MonoBehaviour
 {
     [SerializeField] private GameObject PausePanel;
+    [SerializeField] private DarkDirector Dark;
     private bool Pause;
     public void PauseButton()
     {
@@ -20,6 +23,26 @@ public class PauseDirector : MonoBehaviour
         {
             PausePanel.GetComponent<CanvasGroup>().DOFade(0, 1).SetUpdate(true).OnComplete(() => {PausePanel.SetActive(Pause);});
         }
+    }
+    public void Restart()
+    {
+        Dark.Dark();
+        StartCoroutine(nameof(Reatart));
+    }
+    private IEnumerator Reatart()
+    {
+        yield return new WaitForSeconds(1);
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+    public void Exit()
+    {
+        Dark.Dark();
+        StartCoroutine(nameof(Eit));
+    }
+    private IEnumerator Eit()
+    {
+        yield return new WaitForSeconds(1);
+        SceneManager.LoadScene("MainMenu");
     }
     void Update()
     {
