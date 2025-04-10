@@ -1,10 +1,10 @@
 using UnityEngine;
-using DG.Tweening;
 using System;
 using Unity.Burst;
 [BurstCompile] public class MainUIDirector : MonoBehaviour
 {
     [SerializeField] private AudioSource HUGEASS;
+    public AudioSource HUGEASSFUCK {get => HUGEASS; set => HUGEASS = value;}
     [SerializeField] private float Multiplier;
     [SerializeField] private int RoundUntil;
     private float a;
@@ -23,6 +23,5 @@ using Unity.Burst;
 	        else a = Mathf.Clamp((float)Math.Round(i*1,RoundUntil)*Multiplier, 0.9f, 0.95f);
 	    }
         transform.localScale = Vector3.Lerp(transform.localScale, Vector3.one*a,50*Time.deltaTime);
-	    //transform.DOScale(a, 0.05f).SetEase(Ease.Linear);
     }
 }

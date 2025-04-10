@@ -207,7 +207,8 @@ public class Movement : MonoBehaviour
     {
         GetComponent<AudioSource>().PlayOneShot(SecondPhaseMusic);
         DOTween.To(()=>FirstPhaseAudio.volume,x=>FirstPhaseAudio.volume=x,0,1);
-        transform.DORotate(Vector3.up*90,1);
+        FPCUI.GetComponent<MainUIDirector>().HUGEASSFUCK = GetComponent<AudioSource>();
+        transform.DORotate(Vector3.up*90,1).SetEase(Ease.InOutCubic);
         GameObject Tempcam = Camera.main.transform.parent.gameObject;
         AnotherPlayer.Find("BackCamera").gameObject.SetActive(false);
         Camera.main.transform.parent = null;
@@ -222,13 +223,13 @@ public class Movement : MonoBehaviour
         Model.SetActive(true);
         LeftLeg.SetActive(true);
         RightLeg.SetActive(true);
-        Model.transform.DOLocalMoveY(-1.28f,1).SetEase(Ease.InOutCubic);
-        yield return new WaitForSeconds(1f);
+        Model.transform.DOLocalMoveY(-1.26f,1).SetEase(Ease.InOutCubic);
+        yield return new WaitForSeconds(1);
         Body.SetActive(true);
         ArmLeft.SetActive(true);
         ArmRight.SetActive(true);
-        Model.transform.DOLocalMoveY(-2,1);
-        yield return new WaitForSeconds(1f);
+        Model.transform.DOLocalMoveY(-2,1).SetEase(Ease.InOutCubic);
+        yield return new WaitForSeconds(1);
         ArmLeft.transform.DOLocalMoveX(-0.3125f,0.1f).SetEase(Ease.InOutCubic);
         ArmRight.transform.DOLocalMoveX(0.3125f,0.1f).SetEase(Ease.InOutCubic);
         yield return new WaitForSeconds(0.1f);
@@ -239,7 +240,7 @@ public class Movement : MonoBehaviour
         yield return new WaitForSeconds(1);
         Model.transform.DOLocalMoveY(-0.5f,1);
         transform.DORotate(Vector3.down*90,1);
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(1f);
         if (Velocity.y < 0) Velocity.y = -2;
         CharacterControl.center = Vector3.up*0.5f;
         CharacterControl.height = 2;

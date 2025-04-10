@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 public class PauseDirector : MonoBehaviour
 {
     [SerializeField] private GameObject PausePanel;
+    [SerializeField] private MainUIDirector UIDirector;
     [SerializeField] private DarkDirector Dark;
     private bool Pause;
     public void PauseButton()
@@ -17,10 +18,12 @@ public class PauseDirector : MonoBehaviour
         if (Pause)
         {
             PausePanel.SetActive(Pause);
+            UIDirector.HUGEASSFUCK.Pause();
             PausePanel.GetComponent<CanvasGroup>().DOFade(1, 1).SetUpdate(true);
         }
         else
         {
+            UIDirector.HUGEASSFUCK.UnPause();
             PausePanel.GetComponent<CanvasGroup>().DOFade(0, 1).SetUpdate(true).OnComplete(() => {PausePanel.SetActive(Pause);});
         }
     }
