@@ -15,7 +15,7 @@ MonoBehaviour:
   m_Active: 1
   shader: {fileID: 4800000, guid: f445ed039be4e2c4c81930580ce0fa68, type: 3}
   compatShader: {fileID: 4800000, guid: 2f7db6c094d160148aa3595fd806f507, type: 3}
-  renderPassEvent: 1000
+  renderPassEvent: 550
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0

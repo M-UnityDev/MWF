@@ -20,8 +20,8 @@ public class ItemDirector : MonoBehaviour
         switch (ItemType)
         {
             case ItemEnum.Move:
-            if(MoveItem.TryGetComponent(out IItem mvitem)) 
-                mvitem.StartAction(other.gameObject);
+            foreach (MoveItem comp in MoveItem.GetComponents<MoveItem>())
+                comp.StartAction(other.gameObject);
             break;
             case ItemEnum.Speed:
             if(SpeedItem.TryGetComponent(out IItem sitem)) 

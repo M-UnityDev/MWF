@@ -7,7 +7,7 @@ using UnityEngine.UI;
 [BurstCompile]
 public class Timer : MonoBehaviour
 {
-    private int TimeInSeconds = 10;
+    private int TimeInSeconds = 300;
     [SerializeField] private UnityEngine.Rendering.Volume Volume;
     [SerializeField] private TMP_Text TimeText;
     [SerializeField] private DarkDirector Dark;

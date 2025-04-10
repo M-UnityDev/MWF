@@ -1,7 +1,6 @@
 using System.Collections;
 using DG.Tweening;
 using Unity.Cinemachine;
-using Unity.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -10,6 +9,7 @@ public class Movement : MonoBehaviour
 { 
     [Header("Parameters")]
     [SerializeField] private int BaseSpeed;
+    public int BaseSpeedFuckYou {set => BaseSpeed = value;}
     [SerializeField] private int SprintSpeed;
     [SerializeField] private int SlowSpeed;
     [SerializeField] private int JumpHeight;
@@ -20,7 +20,7 @@ public class Movement : MonoBehaviour
     [SerializeField] private AudioClip DeathSound;
     [SerializeField] private LayerMask LayersToInclude;
     [SerializeField] private LayerMask Walls;
-    public int DistanceToWalkFuckYou { get => DistanceToWalkSqr; set => DistanceToWalkSqr = value; }
+    public int DistanceToWalkFuckYou {set => DistanceToWalkSqr = value;}
     [SerializeField] private int DistanceToCheck;
     [SerializeField] private bool IsFPC;
     [Header("GameObjects")]
