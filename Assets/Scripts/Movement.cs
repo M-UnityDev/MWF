@@ -65,6 +65,16 @@ public class Movement : MonoBehaviour
     private void Awake()
     {
         SkyMaterial.color = Color.green;
+        GetComponent<PlayerInput>().actions.Enable();
+        foreach (InputActionMap map in GetComponent<PlayerInput>().actions.actionMaps)
+        {
+            map.Enable();
+            foreach (InputAction ac in map.actions)
+            {
+                ac.Enable();
+            }
+        }
+        //InputSystem.Update();
         FindFirstObjectByType<CinemachineTargetGroup>().AddMember(transform, 10, 5);
         TempAnotherPlayers = FindObjectsByType<Movement>(FindObjectsSortMode.None);
         FirstPhaseAudio = GameObject.Find("Systems").GetComponent<AudioSource>();
@@ -87,7 +97,7 @@ public class Movement : MonoBehaviour
                         ms.material = SecondPlayerFPCMaterial;
                 return;
             }
-            else if(AnotherPlayer.Equals(null)) AnotherPlayer = transform;
+            else AnotherPlayer = transform;
         }
     }
     public void OnDisconnect() => SceneManager.LoadScene(SceneManager.GetActiveScene().name);

@@ -3,6 +3,7 @@ using Game.Input;
 using DG.Tweening;
 using System.Collections;
 using UnityEngine.SceneManagement;
+using UnityEngine.InputSystem;
 public class PauseDirector : MonoBehaviour
 {
     [SerializeField] private GameObject PausePanel;
@@ -49,7 +50,7 @@ public class PauseDirector : MonoBehaviour
     }
     void Update()
     {
-        if (InputHandler.Inputs.Player.Pause.WasReleasedThisFrame())
+        if (Keyboard.current.escapeKey.wasReleasedThisFrame)
             PauseButton();
     }
 }
