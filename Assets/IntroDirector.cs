@@ -6,6 +6,7 @@ public class IntroDirector : MonoBehaviour
 {
     [SerializeField] private Sprite Logo1;
     [SerializeField] private Sprite Logo2;
+    [SerializeField] private AudioSource Music;
     [SerializeField] private RectTransform Green;
     [SerializeField] private RectTransform Red;
     [SerializeField] private GameObject Intro;
@@ -17,11 +18,12 @@ public class IntroDirector : MonoBehaviour
     }
     private IEnumerator Anima()
     {
+        Music.Play();
         yield return new WaitForSeconds(1);
         LogoImage.sprite = Logo1;
         yield return new WaitForSeconds(1.6f);
         LogoImage.sprite = Logo2;
-        yield return new WaitForSeconds(3.4f);
+        yield return new WaitForSeconds(2.5f);
         Green.DOSizeDelta(new Vector2(-960,0),0.25f).SetEase(Ease.OutCubic).OnComplete(()=>Red.DOSizeDelta(new Vector2(-960,1080),0.25f).SetDelay(0.1f).SetEase(Ease.OutCubic).OnComplete(()=>SPRA.StartAnimation()));
         yield return new WaitForSeconds(1);
         Destroy(Intro.GetComponent<SpriteRenderer>());

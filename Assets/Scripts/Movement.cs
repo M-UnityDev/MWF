@@ -88,6 +88,7 @@ public class Movement : MonoBehaviour
                 transform.position = new Vector3(0,0.5f,2);
                 CharacterControl.enabled = true;
                 AnotherPlayer = Player.transform;
+                AnotherPlayer.GetComponent<Movement>().BaseSpeedFuckYou = BaseSpeed;
                 Outline = AnotherPlayer.Find("Outline").gameObject;
                 AnotherPlayer.GetComponent<Movement>().Outline = transform.Find("Outline").gameObject;
                 Player.AnotherPlayer = transform;
@@ -95,9 +96,13 @@ public class Movement : MonoBehaviour
                 foreach (Transform parts in FPCSkin.transform)
                     foreach (MeshRenderer ms in parts.GetComponentsInChildren<MeshRenderer>(true))
                         ms.material = SecondPlayerFPCMaterial;
-                return;
+                break;
             }
-            else AnotherPlayer = transform;
+            else 
+            {
+                AnotherPlayer = transform;
+                BaseSpeed = 0;
+            }
         }
     }
     public void OnDisconnect() => SceneManager.LoadScene(SceneManager.GetActiveScene().name);

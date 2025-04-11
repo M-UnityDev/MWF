@@ -1460,7 +1460,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76c392e42b5098c458856cdf6ecaaaa1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_FirstSelected: {fileID: 0}
+  m_FirstSelected: {fileID: 617200299}
   m_sendNavigationEvents: 1
   m_DragThreshold: 10
 --- !u!4 &1106610618
@@ -2602,10 +2602,10 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: 80cd0e9be3669332487bdc1755a6cf1b, type: 3}
   m_Resource: {fileID: 8300000, guid: 80cd0e9be3669332487bdc1755a6cf1b, type: 3}
-  m_PlayOnAwake: 1
+  m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
-  Loop: 0
+  Loop: 1
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
@@ -3231,6 +3231,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Logo1: {fileID: 21300000, guid: 192de0f352d867e3fa47decbe9c9e079, type: 3}
   Logo2: {fileID: 21300000, guid: 4c54afdebb6586dcc9b54764380b118d, type: 3}
+  Music: {fileID: 1947455667}
   Green: {fileID: 905773077}
   Red: {fileID: 314460391}
   Intro: {fileID: 722880684831993827}

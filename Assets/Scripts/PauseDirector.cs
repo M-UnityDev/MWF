@@ -1,5 +1,4 @@
 using UnityEngine;
-using Game.Input;
 using DG.Tweening;
 using System.Collections;
 using UnityEngine.SceneManagement;
@@ -30,6 +29,7 @@ public class PauseDirector : MonoBehaviour
     }
     public void Restart()
     {
+        Time.timeScale = 1;
         Dark.Dark();
         StartCoroutine(nameof(Reatart));
     }
@@ -40,6 +40,7 @@ public class PauseDirector : MonoBehaviour
     }
     public void Exit()
     {
+        Time.timeScale = 1;
         Dark.Dark();
         StartCoroutine(nameof(Eit));
     }
